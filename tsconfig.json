@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig.json",
+  "include": ["src", "*.ts"],
+  "compilerOptions": {
+    "allowUnreachableCode": false,
+    "declaration": false,
+    "experimentalDecorators": true,
+    "esModuleInterop": true,
+
+    "lib": ["DOM", "DOM.Iterable", "ES2024"],
+
+    "types": [      
+      "node",      
+    ],
+
+    "module": "ES2020",
+    "moduleResolution": "Bundler",
+
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+
+    "noEmit": true,
+
+    "target": "ES2023",
+
+    "skipLibCheck": true,
+    "strict": true,
+
+    "jsx": "react-jsx"
+  }
+}
