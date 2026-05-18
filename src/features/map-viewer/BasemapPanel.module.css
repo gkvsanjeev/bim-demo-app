@@ -1,0 +1,48 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  font-family: 'Avenir Next', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid #ebebeb;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #6b6b6b;
+  padding: 2px 6px;
+  border-radius: 3px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeBtn:hover {
+  background: #f0f0f0;
+  color: #1a1a1a;
+}
+
+.galleryWrapper {
+  overflow-y: auto;
+  max-height: calc(100vh - 110px);
+}
+
+.galleryWrapper arcgis-basemap-gallery {
+  display: block;
+  width: 100%;
+}

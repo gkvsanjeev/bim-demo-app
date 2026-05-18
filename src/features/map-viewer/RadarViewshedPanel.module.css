@@ -1,0 +1,132 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  font-family: 'Avenir Next', 'Helvetica Neue', Arial, sans-serif;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ─── Header ─────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid #ebebeb;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #6b6b6b;
+  padding: 2px 6px;
+  border-radius: 3px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeBtn:hover {
+  background: #f0f0f0;
+  color: #1a1a1a;
+}
+
+.loading {
+  padding: 16px;
+  font-size: 13px;
+  color: #6b6b6b;
+}
+
+/* ─── Interactive toggle ─────────────────────────────────────── */
+.interactiveRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #ebebeb;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.interactiveCheck {
+  accent-color: #0079c1;
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.interactiveLabel {
+  font-size: 12px;
+  color: #333;
+  user-select: none;
+  font-weight: 500;
+}
+
+.interactiveHint {
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 11px;
+  color: #6b6b6b;
+  font-style: italic;
+  line-height: 1.5;
+  border-bottom: 1px solid #ebebeb;
+  flex-shrink: 0;
+}
+
+/* ─── Placed-viewsheds count ─────────────────────────────────── */
+.countBlock {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 14px;
+  background: #f7f7f7;
+  border-bottom: 1px solid #ebebeb;
+  flex-shrink: 0;
+}
+
+.countLabel {
+  font-size: 11px;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+.countValue {
+  font-size: 14px;
+  color: #0079c1;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Pushes the Generate PDF button to the bottom of the panel */
+.spacer {
+  flex: 1;
+  min-height: 16px;
+}
+
+/* ─── Footer / PDF button ────────────────────────────────────── */
+.footer {
+  padding: 10px 14px;
+  border-top: 1px solid #ebebeb;
+  flex-shrink: 0;
+}
+
+.pdfProgress {
+  font-size: 12px;
+  color: #0079c1;
+  padding: 8px 0;
+  text-align: center;
+  line-height: 1.5;
+}

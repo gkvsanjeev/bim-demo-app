@@ -1,0 +1,75 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  font-family: 'Avenir Next', 'Helvetica Neue', Arial, sans-serif;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  border-bottom: 1px solid #ebebeb;
+  min-height: 44px;
+  flex-shrink: 0;
+}
+
+.tabs {
+  display: flex;
+  gap: 0;
+}
+
+.tab {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 400;
+  color: #6b6b6b;
+  padding: 12px 14px 10px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.tab:hover {
+  color: #1a1a1a;
+}
+
+.tabActive {
+  color: #1a1a1a;
+  font-weight: 600;
+  border-bottom-color: #0079c1;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #6b6b6b;
+  padding: 2px 6px;
+  border-radius: 3px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeBtn:hover {
+  background: #f0f0f0;
+  color: #1a1a1a;
+}
+
+/* Scrollable content area — header stays pinned while layers/legend scrolls */
+.widgetWrapper {
+  overflow-y: auto;
+  max-height: calc(100vh - 94px); /* 50px toolbar offset + 44px panel header */
+}
+
+.widgetWrapper arcgis-layer-list,
+.widgetWrapper arcgis-legend {
+  display: block;
+  width: 100%;
+}

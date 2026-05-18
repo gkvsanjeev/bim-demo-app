@@ -8,6 +8,14 @@ declare module 'react' {
       'arcgis-navigation-toggle': any
       'arcgis-compass': any
       'arcgis-building-explorer': any
+      'arcgis-basemap-gallery': any
+      'arcgis-layer-list': any
+      'arcgis-legend': any
+      'arcgis-coordinate-conversion': any
+      'calcite-action-bar': any
+      'calcite-action': any
+      'calcite-button': any
+      'calcite-icon': any
     }
   }
 }

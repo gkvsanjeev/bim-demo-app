@@ -1,0 +1,164 @@
+/* Outer wrapper — occupies the right edge from below the header to the viewport bottom */
+.toolbar {
+  position: fixed;
+  top: 50px;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  pointer-events: none; /* let scene receive clicks where no element sits */
+}
+
+/* ─── Panel ─────────────────────────────────────────────────── */
+.panel {
+  pointer-events: all;
+  width: 300px;
+  background: #ffffff;
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.12);
+  max-height: 100%;
+  overflow-y: auto;
+  border-left: 1px solid #d4d4d4;
+}
+
+/* ─── Icon strip ─────────────────────────────────────────────── */
+.iconStrip {
+  pointer-events: all;
+  width: 44px;
+  background: #ffffff;
+  border-left: 1px solid #d4d4d4;
+  align-self: stretch; /* fill the full height of .toolbar */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 0;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  overflow: visible; /* allow tooltips to overflow to the left */
+}
+
+/* ─── Icon button ────────────────────────────────────────────── */
+.iconBtn {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #4a4a4a;
+  margin: 2px 0;
+  transition: background 0.15s, color 0.15s;
+  overflow: visible; /* allow tooltip pseudo-element to overflow */
+}
+
+.iconBtn:hover {
+  background: #f0f0f0;
+  color: #1a1a1a;
+}
+
+.iconBtnActive {
+  background: #e8f4fd;
+  border-color: #0079c1;
+  color: #0079c1;
+}
+
+/* ─── Tooltip (appears to the left of the icon) ─────────────── */
+.iconBtn[data-tooltip]::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  right: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(26, 26, 26, 0.88);
+  color: #ffffff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  font-size: 12px;
+  font-family: 'Avenir Next', 'Helvetica Neue', Arial, sans-serif;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s 0.3s; /* slight delay so it doesn't flash on quick passes */
+  z-index: 1001;
+}
+
+.iconBtn[data-tooltip]:hover::before {
+  opacity: 1;
+}
+
+/* ─── Daylight panel (inline, no separate file) ─────────────── */
+.daylightPanel {
+  display: flex;
+  flex-direction: column;
+  font-family: 'Avenir Next', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.daylightHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid #ebebeb;
+}
+
+.daylightTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.daylightClose {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #6b6b6b;
+  padding: 2px 6px;
+  border-radius: 3px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+.daylightClose:hover {
+  background: #f0f0f0;
+  color: #1a1a1a;
+}
+
+.daylightBody {
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.daylightLabel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #1a1a1a;
+}
+
+.daylightTime {
+  font-weight: 600;
+  color: #0079c1;
+  font-size: 13px;
+}
+
+.daylightSlider {
+  width: 100%;
+  accent-color: #0079c1;
+}
+
+.daylightTicks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #909090;
+}
