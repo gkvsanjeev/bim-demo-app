@@ -21,13 +21,23 @@ const WEB_MERCATOR_R = 6378137
 // the building rather than terminating on its near face.
 const FAR_DISTANCE_PADDING_M = 50
 
-// Radar-sensor-style marker (concentric arcs + dot) rendered above the observer
-// so its location is obvious at a glance. Inlined to avoid an extra asset.
+// Radar dish marker: parabolic reflector (quadratic bezier bowing lower-left so
+// the bowl opens upper-right) + aperture line + feed arm + focal point + mast + base.
+// Inlined to avoid an extra asset fetch.
 const SENSOR_ICON_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">' +
-  '<circle cx="16" cy="16" r="3" fill="#ff3b30"/>' +
-  '<path d="M16 5 A11 11 0 0 1 27 16" stroke="#ff3b30" stroke-width="2.5" fill="none" stroke-linecap="round"/>' +
-  '<path d="M16 9 A7 7 0 0 1 23 16" stroke="#ff3b30" stroke-width="2.5" fill="none" stroke-linecap="round"/>' +
+  // mast
+  '<line x1="14" y1="20" x2="14" y2="28" stroke="#c0392b" stroke-width="2.5" stroke-linecap="round"/>' +
+  // base
+  '<line x1="9" y1="28" x2="19" y2="28" stroke="#c0392b" stroke-width="2.5" stroke-linecap="round"/>' +
+  // dish bowl — Q bezier bows toward lower-left so the concave side faces upper-right
+  '<path d="M5 26 Q9 24 23 9" stroke="#c0392b" stroke-width="2.5" fill="none" stroke-linecap="round"/>' +
+  // aperture (rim across the dish opening)
+  '<line x1="5" y1="26" x2="23" y2="9" stroke="#c0392b" stroke-width="1.5" stroke-linecap="round"/>' +
+  // feed arm from pivot to focal point
+  '<line x1="14" y1="20" x2="18" y2="14" stroke="#c0392b" stroke-width="1.5" stroke-linecap="round"/>' +
+  // focal point
+  '<circle cx="18" cy="14" r="2.5" fill="#c0392b"/>' +
   '</svg>'
 const SENSOR_ICON_DATA_URI =
   'data:image/svg+xml;utf8,' + encodeURIComponent(SENSOR_ICON_SVG)
@@ -76,6 +86,9 @@ export function RadarViewshedPanel({ sceneRef, onClose }: RadarViewshedPanelProp
   const [pdfProgress, setPdfProgress] = useState('')
   const [isInteractive, setIsInteractive] = useState(false)
   const [viewshedCount, setViewshedCount] = useState(0)
+  const [horizFov, setHorizFov] = useState(45)
+  const [vertFov, setVertFov] = useState(15)
+  const [farDist, setFarDist] = useState(0)
 
   const analysisRef = useRef<any>(null)        // FIXME(arcgis): ViewshedAnalysis type
   const analysisViewRef = useRef<any>(null)    // FIXME(arcgis): ViewshedAnalysisView3D type
@@ -84,6 +97,7 @@ export function RadarViewshedPanel({ sceneRef, onClose }: RadarViewshedPanelProp
   const changeHandleRef = useRef<{ remove: () => void } | null>(null)
   const aimHandleRef = useRef<{ remove: () => void } | null>(null)
   const observerGraphicRef = useRef<any>(null) // FIXME(arcgis): Graphic type
+  const fovHandlesRef = useRef<Array<{ remove: () => void }>>([])      // FIXME(arcgis): WatchHandle type
 
   // ─── Setup: create ViewshedAnalysis on the SceneView ──────────────────────
   useEffect(() => {
@@ -164,17 +178,22 @@ export function RadarViewshedPanel({ sceneRef, onClose }: RadarViewshedPanelProp
       analysisView.selectedViewshed = initialViewshed
       setViewshedCount(analysis.viewsheds.length)
 
+      // Seed FOV state from the initial viewshed
+      setHorizFov(initialViewshed.horizontalFieldOfView)
+      setVertFov(initialViewshed.verticalFieldOfView)
+      setFarDist(initialAim.farDistance)
+
       // Prominent sensor marker at the observer location. Sits on top of the
       // analysis's own (small) observer handle and rides above it via callout.
       const sensorSymbol = new PointSymbol3D({
         symbolLayers: [
           new IconSymbol3DLayer({
             resource: { href: SENSOR_ICON_DATA_URI },
-            size: 28,
-            anchor: 'center',
+            size: 26,
+            anchor: 'bottom',
           }),
         ],
-        verticalOffset: { screenLength: 40, maxWorldLength: 500, minWorldLength: 20 },
+        verticalOffset: { screenLength: 16, maxWorldLength: 150, minWorldLength: 8 },
         callout: { type: 'line', size: 1.5, color: [255, 255, 255], border: { color: [0, 0, 0] } },
       })
 
@@ -213,6 +232,24 @@ export function RadarViewshedPanel({ sceneRef, onClose }: RadarViewshedPanelProp
         },
       )
 
+      // Sync FOV inputs and observer elevation when the selected viewshed changes
+      // or when its properties are modified via the drag handles in the scene.
+      // Each primitive watcher avoids the object-reference false-positive problem.
+      fovHandlesRef.current.push(
+        reactiveUtils.watch(
+          () => (analysisView.selectedViewshed as any)?.horizontalFieldOfView as number | undefined,
+          (val: number | undefined) => { if (val != null) setHorizFov(val) },
+        ),
+        reactiveUtils.watch(
+          () => (analysisView.selectedViewshed as any)?.verticalFieldOfView as number | undefined,
+          (val: number | undefined) => { if (val != null) setVertFov(val) },
+        ),
+        reactiveUtils.watch(
+          () => (analysisView.selectedViewshed as any)?.farDistance as number | undefined,
+          (val: number | undefined) => { if (val != null) setFarDist(val) },
+        ),
+      )
+
       analysisRef.current = analysis
       analysisViewRef.current = analysisView
 
@@ -231,6 +268,8 @@ export function RadarViewshedPanel({ sceneRef, onClose }: RadarViewshedPanelProp
       abortRef.current?.abort()
       changeHandleRef.current?.remove()
       aimHandleRef.current?.remove()
+      fovHandlesRef.current.forEach(h => h.remove())
+      fovHandlesRef.current = []
       const analysis = analysisRef.current
       const sceneEl2 = sceneRef.current
       const observerGraphic = observerGraphicRef.current
@@ -272,6 +311,26 @@ export function RadarViewshedPanel({ sceneRef, onClose }: RadarViewshedPanelProp
 
   const stopPlacing = useCallback(() => {
     abortRef.current?.abort()
+  }, [])
+
+  const handleHorizFovChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseFloat(e.target.value)
+    if (isNaN(val)) return
+    setHorizFov(val)
+    const selected = analysisViewRef.current?.selectedViewshed
+    if (selected && val >= 1 && val <= 360) {
+      selected.horizontalFieldOfView = val
+    }
+  }, [])
+
+  const handleVertFovChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseFloat(e.target.value)
+    if (isNaN(val)) return
+    setVertFov(val)
+    const selected = analysisViewRef.current?.selectedViewshed
+    if (selected && val >= 1 && val <= 180) {
+      selected.verticalFieldOfView = val
+    }
   }, [])
 
   // ─── Single checkbox controls both placement and editing ──────────────────
@@ -395,6 +454,53 @@ export function RadarViewshedPanel({ sceneRef, onClose }: RadarViewshedPanelProp
               <span className={styles.countValue}>{viewshedCount}</span>
             </div>
           )}
+
+          <div className={styles.fovBlock}>
+            <div className={styles.fovRow}>
+              <label className={styles.fovLabel} htmlFor="radarHorizFov">
+                Horizontal FOV
+              </label>
+              <div className={styles.fovInputGroup}>
+                <input
+                  id="radarHorizFov"
+                  type="number"
+                  min={1}
+                  max={360}
+                  value={horizFov}
+                  onChange={handleHorizFovChange}
+                  className={styles.fovInput}
+                />
+                <span className={styles.fovUnit}>°</span>
+              </div>
+            </div>
+
+            <div className={styles.fovRow}>
+              <label className={styles.fovLabel} htmlFor="radarVertFov">
+                Vertical FOV
+              </label>
+              <div className={styles.fovInputGroup}>
+                <input
+                  id="radarVertFov"
+                  type="number"
+                  min={1}
+                  max={180}
+                  value={vertFov}
+                  onChange={handleVertFovChange}
+                  className={styles.fovInput}
+                />
+                <span className={styles.fovUnit}>°</span>
+              </div>
+            </div>
+
+            {farDist > 0 && (
+              <div className={styles.fovRow}>
+                <span className={styles.fovLabel}>Vertical Height</span>
+                <span className={styles.fovValue}>
+                  {(farDist * Math.tan((vertFov / 2) * (Math.PI / 180))).toFixed(1)} m
+                </span>
+              </div>
+            )}
+          </div>
 
           <div className={styles.spacer} />
 
