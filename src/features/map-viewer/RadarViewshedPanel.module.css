@@ -110,6 +110,70 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* ─── FOV controls ──────────────────────────────────────────── */
+.fovBlock {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid #ebebeb;
+  flex-shrink: 0;
+}
+
+.fovRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 14px;
+  border-bottom: 1px solid #f2f2f2;
+}
+
+.fovRow:last-child {
+  border-bottom: none;
+}
+
+.fovLabel {
+  font-size: 11px;
+  color: #555;
+  font-weight: 500;
+  user-select: none;
+  flex-shrink: 0;
+  cursor: default;
+}
+
+.fovInputGroup {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.fovInput {
+  width: 52px;
+  font-size: 12px;
+  padding: 2px 5px;
+  border: 1px solid #c8c8c8;
+  border-radius: 3px;
+  text-align: right;
+  color: #1a1a1a;
+  background: #fff;
+}
+
+.fovInput:focus {
+  outline: none;
+  border-color: #0079c1;
+}
+
+.fovUnit {
+  font-size: 11px;
+  color: #888;
+  min-width: 10px;
+}
+
+.fovValue {
+  font-size: 13px;
+  color: #0079c1;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Pushes the Generate PDF button to the bottom of the panel */
 .spacer {
   flex: 1;
