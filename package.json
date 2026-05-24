@@ -15,8 +15,11 @@
     "@arcgis/map-components": "^5.0.0",
     "@esri/calcite-components": "^5.0.0",
     "jspdf": "^4.2.1",
+    "oidc-client-ts": "^3.5.0",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react-dom": "^19.2.6",
+    "react-oidc-context": "^3.3.1",
+    "react-router-dom": "^7.15.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

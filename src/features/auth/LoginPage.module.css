@@ -1,0 +1,220 @@
+/* ─── Full-page background ───────────────────────────────────────── */
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, #071428 0%, #0d2144 55%, #071f3a 100%);
+  font-family: 'Avenir Next', 'Helvetica Neue', Arial, sans-serif;
+  position: relative;
+  overflow: hidden;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* Subtle aviation grid overlay */
+.page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0, 121, 193, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 121, 193, 0.06) 1px, transparent 1px);
+  background-size: 44px 44px;
+  pointer-events: none;
+}
+
+/* Radial glow behind the card */
+.page::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(0, 121, 193, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ─── Login card ─────────────────────────────────────────────────── */
+.card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45), 0 8px 24px rgba(0, 0, 0, 0.3);
+  padding: 40px 44px 32px;
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Logo ───────────────────────────────────────────────────────── */
+.logoArea {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.logoIcon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #003366 0%, #0079c1 100%);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(0, 121, 193, 0.35);
+}
+
+/* ─── App identity ───────────────────────────────────────────────── */
+.appName {
+  font-size: 30px;
+  font-weight: 800;
+  color: #0a1628;
+  text-align: center;
+  letter-spacing: -0.03em;
+  margin: 0 0 4px;
+  line-height: 1;
+}
+
+.appNameAccent {
+  color: #0079c1;
+}
+
+.orgName {
+  font-size: 11px;
+  color: #999;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+
+.tagline {
+  font-size: 13px;
+  color: #555;
+  text-align: center;
+  margin: 0 0 24px;
+}
+
+/* ─── Divider ────────────────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: #eee;
+  margin: 0 0 20px;
+}
+
+.sectionLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: center;
+  margin: 0 0 14px;
+}
+
+/* ─── Buttons ────────────────────────────────────────────────────── */
+.primaryBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 13px 16px;
+  background: #0079c1;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  margin-bottom: 10px;
+}
+
+.primaryBtn:hover:not(:disabled) {
+  background: #005e99;
+  transform: translateY(-1px);
+}
+
+.primaryBtn:disabled {
+  background: #b0c8da;
+  cursor: not-allowed;
+}
+
+.secondaryBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  background: #fff;
+  color: #333;
+  border: 1.5px solid #ddd;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+}
+
+.secondaryBtn:hover:not(:disabled) {
+  border-color: #aaa;
+  background: #fafafa;
+  transform: translateY(-1px);
+}
+
+.secondaryBtn:disabled {
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+/* ─── Error ──────────────────────────────────────────────────────── */
+.errorMsg {
+  font-size: 12px;
+  color: #c62828;
+  text-align: center;
+  margin: 10px 0 0;
+}
+
+/* ─── Role guide ─────────────────────────────────────────────────── */
+.roleNote {
+  margin-top: 20px;
+  padding: 14px 16px;
+  background: #f7f9fb;
+  border: 1px solid #e8edf2;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.roleNoteRow {
+  display: flex;
+  gap: 8px;
+  font-size: 11px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.roleNoteLabel {
+  font-weight: 700;
+  color: #1a1a1a;
+  white-space: nowrap;
+  min-width: 80px;
+}
+
+/* ─── Footer note ────────────────────────────────────────────────── */
+.footer {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 11px;
+  color: #bbb;
+}
