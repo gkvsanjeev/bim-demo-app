@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from 'react-oidc-context'
+import { recordLogin } from '../../lib/lastLogin'
 import styles from './CallbackPage.module.css'
 
 export function CallbackPage() {
@@ -11,7 +12,8 @@ export function CallbackPage() {
     if (auth.error) {
       navigate('/login', { replace: true })
     } else if (auth.isAuthenticated) {
-      navigate('/', { replace: true })
+      recordLogin()
+      navigate('/dashboard', { replace: true })
     }
   }, [auth.isAuthenticated, auth.error, navigate])
 

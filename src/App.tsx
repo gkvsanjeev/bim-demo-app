@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useParams } from 'react-router-dom'
 import '@arcgis/map-components/components/arcgis-scene'
 import '@arcgis/map-components/components/arcgis-zoom'
 import '@arcgis/map-components/components/arcgis-navigation-toggle'
@@ -16,15 +17,9 @@ const HEADER_H = 50
 // Icon strip width must stay in sync with RightToolbar.module.css .iconStrip width
 const ICON_STRIP_W = 44
 
-function generateApplicationId(): string {
-  const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, '')
-  const suffix = Math.random().toString(36).toUpperCase().slice(2, 7)
-  return `CAAS-${datePart}-${suffix}`
-}
-
 function App() {
+  const { applicationId = '' } = useParams<{ applicationId: string }>()
   const sceneRef = useRef<any>(null) // FIXME(arcgis): arcgis-scene element type not exported
-  const applicationId = useMemo(() => generateApplicationId(), [])
   const [isBasemapOpen, setIsBasemapOpen] = useState(false)
   const [isBuildingExplorerOpen, setIsBuildingExplorerOpen] = useState(true)
   const [isCoordinatesOpen, setIsCoordinatesOpen] = useState(false)
