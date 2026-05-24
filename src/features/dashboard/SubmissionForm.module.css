@@ -1,5 +1,6 @@
 .page {
-  min-height: 100vh;
+  height: 100%;
+  overflow-y: auto;
   background: #f0f4f8;
   display: flex;
   flex-direction: column;
@@ -125,6 +126,7 @@
 /* ─── Drop zone ─────────────────────────────────────────────────────────────── */
 
 .dropZone {
+  position: relative;  /* contains the visually-hidden input */
   border: 2px dashed #d1d5db;
   border-radius: 8px;
   padding: 24px;
@@ -147,8 +149,22 @@
   border-color: #dc2626;
 }
 
+.dropZoneValid {
+  border-color: #2e7d32;
+  background: #f0faf0;
+  border-style: solid;
+}
+
 .hiddenInput {
-  display: none;
+  /* Visually hidden but present in the DOM — labels can open file dialogs for it.
+     display:none blocks this in some browsers. */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  clip: rect(0, 0, 0, 0);
 }
 
 .dropPrompt {
@@ -176,10 +192,28 @@
   margin: 0;
 }
 
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #0079c1;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .fileSelected {
   display: flex;
   align-items: center;
   gap: 14px;
+}
+
+.fileInfo {
+  flex: 1;
+  min-width: 0;
 }
 
 .fileName {
@@ -187,6 +221,9 @@
   font-weight: 600;
   color: #0d1b2e;
   margin: 0 0 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   word-break: break-all;
 }
 
@@ -194,6 +231,13 @@
   font-size: 12px;
   color: #6b7280;
   margin: 0;
+}
+
+.fileInvalidReason {
+  font-size: 12px;
+  color: #c62828;
+  margin: 0;
+  font-weight: 500;
 }
 
 .removeFile {
@@ -250,6 +294,16 @@
   color: #374151;
 }
 
+.submitError {
+  font-size: 13px;
+  color: #c62828;
+  background: #fce8e6;
+  border: 1px solid #f5c6c6;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin: 0;
+}
+
 /* ─── Actions ───────────────────────────────────────────────────────────────── */
 
 .actions {
@@ -288,6 +342,12 @@
   transition: background 0.15s;
 }
 
-.submitBtn:hover {
+.submitBtn:hover:not(:disabled) {
   background: #005e96;
+}
+
+.submitBtn:disabled,
+.cancelBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

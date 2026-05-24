@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from 'react-oidc-context'
+import JSZip from 'jszip'
 import { DashboardHeader } from './DashboardHeader'
 import { addSubmission, generateApplicationId } from '../../lib/submissionStore'
 import styles from './SubmissionForm.module.css'
@@ -13,11 +14,56 @@ interface FormErrors {
   applicantName?: string
   applicantEmail?: string
   file?: string
+  submit?: string
 }
+
+type FileState =
+  | { status: 'none' }
+  | { status: 'validating'; name: string }
+  | { status: 'invalid'; name: string; reason: string }
+  | { status: 'valid'; file: File; ifcBase: string }
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+async function validateZipContents(file: File): Promise<string | null> {
+  try {
+    const zip = await JSZip.loadAsync(file)
+    const entries = Object.values(zip.files).filter((f) => !f.dir)
+    const names = entries.map((f) => {
+      const parts = f.name.split('/')
+      return parts[parts.length - 1].toLowerCase()
+    })
+
+    const ifcName = names.find((n) => n.endsWith('.ifc'))
+    if (!ifcName) return 'The zip must contain an .ifc file.'
+
+    const base = ifcName.slice(0, -4)
+    if (!names.includes(`${base}.prj`))
+      return `Missing required file: ${base}.prj`
+    if (!names.includes(`${base}.wld3`))
+      return `Missing required file: ${base}.wld3`
+
+    return null
+  } catch {
+    return 'Could not read the zip. Ensure it is a valid .zip archive.'
+  }
+}
+
+async function uploadFile(file: File): Promise<string> {
+  const res = await fetch('/upload', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/octet-stream',
+      'X-Filename': file.name,
+    },
+    body: file,
+  })
+  if (!res.ok) throw new Error(`Upload failed (HTTP ${res.status})`)
+  const json = (await res.json()) as { path: string }
+  return json.path
 }
 
 export function SubmissionForm() {
@@ -26,51 +72,84 @@ export function SubmissionForm() {
 
   const userEmail = (auth.user?.profile.email ?? '') as string
   const userName = (auth.user?.profile.name ?? '') as string
-  const appRef = useState(() => generateApplicationId())[0]
+  const [appRef] = useState(() => generateApplicationId())
 
   const [buildingName, setBuildingName] = useState('')
   const [address, setAddress] = useState('')
   const [applicantName, setApplicantName] = useState(userName)
   const [applicantEmail, setApplicantEmail] = useState(userEmail)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [fileState, setFileState] = useState<FileState>({ status: 'none' })
   const [errors, setErrors] = useState<FormErrors>({})
   const [isDragging, setIsDragging] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  function validate(): FormErrors {
-    const e: FormErrors = {}
-    if (!buildingName.trim()) e.buildingName = 'Building name is required.'
-    if (!address.trim()) e.address = 'Address is required.'
-    if (!applicantName.trim()) e.applicantName = 'Applicant name is required.'
-    if (!applicantEmail.trim()) e.applicantEmail = 'Email is required.'
-    if (!selectedFile) {
-      e.file = 'Please upload the BIM package (.zip).'
-    } else if (!selectedFile.name.toLowerCase().endsWith('.zip')) {
-      e.file = 'File must be a .zip archive.'
-    } else if (selectedFile.size > MAX_FILE_BYTES) {
-      e.file = `File size must not exceed 100 MB (selected: ${formatFileSize(selectedFile.size)}).`
-    }
-    return e
-  }
-
-  function handleFileSelect(file: File | null) {
+  async function handleFileSelect(file: File | null) {
     if (!file) return
-    setSelectedFile(file)
+    if (!file.name.toLowerCase().endsWith('.zip')) {
+      setFileState({ status: 'invalid', name: file.name, reason: 'File must be a .zip archive.' })
+      return
+    }
+    if (file.size > MAX_FILE_BYTES) {
+      setFileState({
+        status: 'invalid',
+        name: file.name,
+        reason: `File exceeds 100 MB (${formatFileSize(file.size)}).`,
+      })
+      return
+    }
+
+    setFileState({ status: 'validating', name: file.name })
     setErrors((prev) => ({ ...prev, file: undefined }))
+
+    const error = await validateZipContents(file)
+    if (error) {
+      setFileState({ status: 'invalid', name: file.name, reason: error })
+    } else {
+      // Extract the ifc base name for display
+      const zip = await JSZip.loadAsync(file)
+      const ifcEntry = Object.values(zip.files).find(
+        (f) => !f.dir && f.name.toLowerCase().endsWith('.ifc'),
+      )
+      const ifcBase = ifcEntry
+        ? ifcEntry.name.split('/').pop()!.slice(0, -4)
+        : file.name.replace(/\.zip$/i, '')
+      setFileState({ status: 'valid', file, ifcBase })
+    }
   }
 
   function handleDrop(e: React.DragEvent) {
     e.preventDefault()
     setIsDragging(false)
-    const file = e.dataTransfer.files[0] ?? null
-    handleFileSelect(file)
+    void handleFileSelect(e.dataTransfer.files[0] ?? null)
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  function validateFields(): FormErrors {
+    const e: FormErrors = {}
+    if (!buildingName.trim()) e.buildingName = 'Building name is required.'
+    if (!address.trim()) e.address = 'Address is required.'
+    if (!applicantName.trim()) e.applicantName = 'Applicant name is required.'
+    if (!applicantEmail.trim()) e.applicantEmail = 'Email is required.'
+    if (fileState.status !== 'valid') e.file = 'Please upload a valid BIM package (.zip).'
+    return e
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const errs = validate()
+    const errs = validateFields()
     if (Object.keys(errs).length > 0) {
       setErrors(errs)
+      return
+    }
+    if (fileState.status !== 'valid') return
+
+    setIsSubmitting(true)
+    setErrors({})
+
+    try {
+      await uploadFile(fileState.file)
+    } catch (err) {
+      setErrors({ submit: err instanceof Error ? err.message : 'Upload failed. Try again.' })
+      setIsSubmitting(false)
       return
     }
 
@@ -82,12 +161,15 @@ export function SubmissionForm() {
       submitterEmail: applicantEmail.trim().toLowerCase(),
       submittedAt: new Date().toISOString(),
       status: 'Submitted',
-      fileName: selectedFile!.name,
-      fileSize: selectedFile!.size,
+      fileName: fileState.file.name,
+      fileSize: fileState.file.size,
     })
 
     navigate('/dashboard')
   }
+
+  const fileValid = fileState.status === 'valid'
+  const fileInvalid = fileState.status === 'invalid'
 
   return (
     <div className={styles.page}>
@@ -103,17 +185,11 @@ export function SubmissionForm() {
           </p>
         </div>
 
-        <form className={styles.form} onSubmit={handleSubmit} noValidate>
+        <form className={styles.form} onSubmit={(e) => void handleSubmit(e)} noValidate>
           {/* Application Reference */}
           <div className={styles.fieldGroup}>
             <label className={styles.label}>Application Reference</label>
-            <input
-              className={styles.input}
-              type="text"
-              value={appRef}
-              readOnly
-              aria-readonly="true"
-            />
+            <input className={styles.input} type="text" value={appRef} readOnly aria-readonly="true" />
             <span className={styles.hint}>Auto-generated — keep this for your records.</span>
           </div>
 
@@ -133,9 +209,7 @@ export function SubmissionForm() {
               }}
               placeholder="e.g. Changi Business Park Tower 3"
             />
-            {errors.buildingName && (
-              <span className={styles.errorMsg}>{errors.buildingName}</span>
-            )}
+            {errors.buildingName && <span className={styles.errorMsg}>{errors.buildingName}</span>}
           </div>
 
           {/* Address */}
@@ -201,68 +275,123 @@ export function SubmissionForm() {
 
           {/* BIM Package Upload */}
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>
+            <span className={styles.label}>
               BIM Package (.zip) <span className={styles.required}>*</span>
-            </label>
-            <div
-              className={`${styles.dropZone} ${isDragging ? styles.dropZoneActive : ''} ${errors.file ? styles.dropZoneError : ''}`}
+            </span>
+
+            {/*
+              Using <label> as the drop zone makes the entire area natively trigger
+              the file dialog on click — no JavaScript click() needed, works in all browsers.
+            */}
+            <label
+              htmlFor="bim-upload"
+              className={[
+                styles.dropZone,
+                isDragging ? styles.dropZoneActive : '',
+                fileValid ? styles.dropZoneValid : '',
+                (fileInvalid || errors.file) ? styles.dropZoneError : '',
+              ].join(' ')}
               onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
               onDragLeave={() => setIsDragging(false)}
               onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && fileInputRef.current?.click()}
-              aria-label="Upload BIM zip file"
             >
               <input
-                ref={fileInputRef}
+                id="bim-upload"
                 type="file"
                 accept=".zip"
                 className={styles.hiddenInput}
-                onChange={(e) => handleFileSelect(e.target.files?.[0] ?? null)}
+                onChange={(e) => void handleFileSelect(e.target.files?.[0] ?? null)}
+                // Reset value so the same file can be re-selected after removal
+                onClick={(e) => { (e.target as HTMLInputElement).value = '' }}
               />
-              {selectedFile ? (
+
+              {fileState.status === 'validating' && (
+                <div className={styles.dropPrompt}>
+                  <div className={styles.spinner} aria-label="Validating" />
+                  <p className={styles.dropText}>Validating <strong>{fileState.name}</strong>…</p>
+                </div>
+              )}
+
+              {fileState.status === 'valid' && (
                 <div className={styles.fileSelected}>
-                  <svg viewBox="0 0 24 24" width="24" height="24" fill="#0079c1" aria-hidden="true">
-                    <path d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z" />
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="#2e7d32" aria-hidden="true">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
                   </svg>
-                  <div>
-                    <p className={styles.fileName}>{selectedFile.name}</p>
-                    <p className={styles.fileSize}>{formatFileSize(selectedFile.size)}</p>
+                  <div className={styles.fileInfo}>
+                    <p className={styles.fileName}>{fileState.file.name}</p>
+                    <p className={styles.fileSize}>
+                      {formatFileSize(fileState.file.size)} · IFC base: <strong>{fileState.ifcBase}</strong>
+                    </p>
                   </div>
                   <button
                     type="button"
                     className={styles.removeFile}
-                    onClick={(e) => { e.stopPropagation(); setSelectedFile(null) }}
+                    onClick={(e) => {
+                      e.preventDefault()  // stops label from re-opening dialog
+                      e.stopPropagation()
+                      setFileState({ status: 'none' })
+                    }}
                     aria-label="Remove file"
                   >
                     ✕
                   </button>
                 </div>
-              ) : (
+              )}
+
+              {fileState.status === 'invalid' && (
+                <div className={styles.fileSelected}>
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="#c62828" aria-hidden="true">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                  </svg>
+                  <div className={styles.fileInfo}>
+                    <p className={styles.fileName}>{fileState.name}</p>
+                    <p className={styles.fileInvalidReason}>{fileState.reason}</p>
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.removeFile}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      setFileState({ status: 'none' })
+                    }}
+                    aria-label="Remove file"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+
+              {fileState.status === 'none' && (
                 <div className={styles.dropPrompt}>
                   <svg viewBox="0 0 24 24" width="32" height="32" fill="#9ca3af" aria-hidden="true">
                     <path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z" />
                   </svg>
                   <p className={styles.dropText}>
-                    Drag &amp; drop your .zip file here, or <span className={styles.dropLink}>browse</span>
+                    Drag &amp; drop your .zip file here, or{' '}
+                    <span className={styles.dropLink}>Browse</span>
                   </p>
                   <p className={styles.dropHint}>Maximum file size: 100 MB</p>
                 </div>
               )}
-            </div>
+            </label>
+
             {errors.file && <span className={styles.errorMsg}>{errors.file}</span>}
 
             <div className={styles.requirementBox}>
-              <p className={styles.requirementTitle}>Required files inside the zip:</p>
+              <p className={styles.requirementTitle}>Required files inside the zip (same base name):</p>
               <ul className={styles.requirementList}>
-                <li><code>.ifc</code> — IFC+SG BIM model file</li>
-                <li><code>.prj</code> — Projection / coordinate reference file</li>
-                <li><code>.wld3</code> — World file for 3D georeferencing</li>
+                <li><code>building.ifc</code> — IFC+SG BIM model file</li>
+                <li><code>building.prj</code> — Projection / coordinate reference file</li>
+                <li><code>building.wld3</code> — World file for 3D georeferencing</li>
               </ul>
             </div>
           </div>
+
+          {/* Submit error */}
+          {errors.submit && (
+            <p className={styles.submitError}>{errors.submit}</p>
+          )}
 
           {/* Actions */}
           <div className={styles.actions}>
@@ -270,11 +399,16 @@ export function SubmissionForm() {
               type="button"
               className={styles.cancelBtn}
               onClick={() => navigate('/dashboard')}
+              disabled={isSubmitting}
             >
               Cancel
             </button>
-            <button type="submit" className={styles.submitBtn}>
-              Submit Application
+            <button
+              type="submit"
+              className={styles.submitBtn}
+              disabled={isSubmitting || fileState.status === 'validating'}
+            >
+              {isSubmitting ? 'Uploading…' : 'Submit Application'}
             </button>
           </div>
         </form>
