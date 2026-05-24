@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import '@esri/calcite-components/components/calcite-icon'
+import { AssessmentPanel } from './AssessmentPanel'
 import { SearchPanel } from './SearchPanel'
 import { LayersPanel } from './LayersPanel'
 import { SceneToolsPanel } from './SceneToolsPanel'
 import { RadarViewshedPanel } from './RadarViewshedPanel'
 import styles from './RightToolbar.module.css'
 
-type ToolId = 'search' | 'layers' | 'basemap' | 'coordinates' | 'daylight' | 'scene-tools' | 'radar-viewshed' | 'building-explorer'
+type ToolId = 'search' | 'layers' | 'basemap' | 'coordinates' | 'daylight' | 'scene-tools' | 'radar-viewshed' | 'assessment' | 'building-explorer'
 
 interface RightToolbarProps {
   sceneRef: React.RefObject<any> // FIXME(arcgis): arcgis-scene element type not exported
@@ -102,6 +103,19 @@ function RadarIcon() {
   )
 }
 
+function AssessmentIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {/* Clipboard body */}
+      <path d="M9 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-3" />
+      <rect x="9" y="1" width="6" height="4" rx="1" />
+      {/* Checklist lines */}
+      <polyline points="9 12 11 14 15 10" />
+      <line x1="9" y1="17" x2="15" y2="17" />
+    </svg>
+  )
+}
+
 const TOOLS: { id: ToolId; label: string; icon: React.ReactNode }[] = [
   { id: 'search', label: 'Search', icon: <SearchIcon /> },
   { id: 'layers', label: 'Layers', icon: <LayersIcon /> },
@@ -110,6 +124,7 @@ const TOOLS: { id: ToolId; label: string; icon: React.ReactNode }[] = [
   { id: 'daylight', label: 'Daylight', icon: <DaylightIcon /> },
   { id: 'scene-tools', label: 'Scene tools', icon: <SceneToolsIcon /> },
   { id: 'radar-viewshed', label: 'Radar viewshed', icon: <RadarIcon /> },
+  { id: 'assessment', label: 'Assessments', icon: <AssessmentIcon /> },
   { id: 'building-explorer', label: 'Building explorer', icon: <calcite-icon icon="relative-to-scene-elevation" scale="s" /> },
 ]
 
@@ -148,21 +163,12 @@ export function RightToolbar({ sceneRef, isBasemapOpen, onBasemapToggle, isBuild
   const [activeTool, setActiveTool] = useState<ToolId | null>(null)
 
   const handleToolClick = (toolId: ToolId) => {
-    if (toolId === 'basemap') {
-      setActiveTool(null)
-      onBasemapToggle()
-      return
-    }
-    if (toolId === 'building-explorer') {
-      setActiveTool(null)
-      onBuildingExplorerToggle()
-      return
-    }
-    if (toolId === 'coordinates') {
-      setActiveTool(null)
-      onCoordinatesToggle()
-      return
-    }
+    // These three are ArcGIS widgets rendered in the scene — they have no panel
+    // and must not affect the independently open panel tool (assessment, radar, etc.)
+    if (toolId === 'basemap') { onBasemapToggle(); return }
+    if (toolId === 'building-explorer') { onBuildingExplorerToggle(); return }
+    if (toolId === 'coordinates') { onCoordinatesToggle(); return }
+
     if (isBasemapOpen) onBasemapToggle()
     setActiveTool((prev) => (prev === toolId ? null : toolId))
   }
@@ -188,6 +194,9 @@ export function RightToolbar({ sceneRef, isBasemapOpen, onBasemapToggle, isBuild
           )}
           {activeTool === 'radar-viewshed' && (
             <RadarViewshedPanel sceneRef={sceneRef} onClose={handleClose} />
+          )}
+          {activeTool === 'assessment' && (
+            <AssessmentPanel onClose={handleClose} />
           )}
         </div>
       )}

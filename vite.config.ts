@@ -6,4 +6,13 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['@arcgis/core', '@arcgis/map-components', '@arcgis/charts-components', '@esri/calcite-components'],
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+  },
 })
