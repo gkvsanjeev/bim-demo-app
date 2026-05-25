@@ -1,0 +1,49 @@
+services:
+
+  # ---------------------------------------------------------------------------
+  # Keycloak — identity provider (OIDC / SSO)
+  # Admin UI: http://localhost:18080/admin  (admin / admin)
+  # ---------------------------------------------------------------------------
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: skysafe-keycloak
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "18080:8080"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL — application database
+  # Connection: postgresql://skysafe:skysafe_dev@localhost:5432/skysafe
+  # Init script runs automatically on first start (skipped on subsequent starts)
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:latest
+    container_name: skysafe-postgres
+    environment:
+      POSTGRES_DB:       skysafe
+      POSTGRES_USER:     skysafe
+      POSTGRES_PASSWORD: skysafe_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      # postgres:18+ requires mount at /var/lib/postgresql (not /data subdirectory)
+      - postgres_data:/var/lib/postgresql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U skysafe -d skysafe"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  keycloak_data:
+    name: keycloak_data
+  postgres_data:
+    name: skysafe_postgres_data
