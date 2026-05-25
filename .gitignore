@@ -14,6 +14,12 @@ dist-ssr
 *.tsbuildinfo
 .claude/
 
+# Runtime / tool artifacts
+.playwright-mcp/
+__azurite_db_blob__.json
+__azurite_db_blob_extent__.json
+public/uploads/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
