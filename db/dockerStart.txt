@@ -1,0 +1,70 @@
+● Here's a clean recap of every Docker command used and why:
+
+  ---
+  Diagnosis
+
+  docker ps -a --filter "name=skysafe-postgres" --filter "name=skysafe-keycloak" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+  Confirmed both containers existed but were stopped (Exited).
+
+  docker start skysafe-postgres
+  docker start skysafe-keycloak
+  First attempt — failed with two errors:
+  - Postgres: broken bind mount (db/init.sql) — the path with spaces in OneDrive - NCS PTE LTD confused Docker's internal path resolver.
+  - Keycloak: its Docker network had been deleted while the container was stopped.
+
+  docker inspect skysafe-postgres skysafe-keycloak
+  Read the full config of both containers — images used, volumes, ports, env vars, startup commands — needed to recreate them identically.
+
+  ---
+  Fix
+
+  docker rm skysafe-postgres skysafe-keycloak
+  Removed the broken containers. Volumes are NOT deleted by docker rm — only the container config is removed. The data volumes (skysafe_postgres_data,
+  keycloak_data) remained untouched on disk.
+
+  docker run -d \
+    --name skysafe-postgres \
+    -p 5432:5432 \
+    -e POSTGRES_PASSWORD=skysafe_dev \
+    -e POSTGRES_DB=skysafe \
+    -e POSTGRES_USER=skysafe \
+    -e PGDATA=/var/lib/postgresql/18/docker \
+    -v skysafe_postgres_data:/var/lib/postgresql \
+    postgres:latest postgres
+  Recreated the postgres container, reattaching the existing skysafe_postgres_data volume. The init.sql bind mount was intentionally dropped — Postgres only
+  runs init scripts on a fresh empty data directory. Since the volume already had data, skipping it is safe and avoids the broken path.
+
+  docker run -d \
+    --name skysafe-keycloak \
+    -p 18080:8080 \
+    -e KEYCLOAK_ADMIN=admin \
+    -e KEYCLOAK_ADMIN_PASSWORD=admin \
+    -e KC_RUN_IN_CONTAINER=true \
+    -v keycloak_data:/opt/keycloak/data \
+    quay.io/keycloak/keycloak:latest start-dev
+  Recreated Keycloak, reattaching the existing keycloak_data volume. A fresh container gets a fresh default Docker bridge network, which fixed the missing
+  network error.
+
+  ---
+    -v skysafe_postgres_data:/var/lib/postgresql \
+    postgres:latest postgres
+  Recreated the postgres container, reattaching the existing skysafe_postgres_data volume. The init.sql bind mount was intentionally dropped — Postgres only
+  runs init scripts on a fresh empty data directory. Since the volume already had data, skipping it is safe and avoids the broken path.
+
+  docker run -d \
+    --name skysafe-keycloak \
+    -p 18080:8080 \
+    -e KEYCLOAK_ADMIN=admin \
+    -e KEYCLOAK_ADMIN_PASSWORD=admin \
+    -e KC_RUN_IN_CONTAINER=true \
+    -v keycloak_data:/opt/keycloak/data \
+    quay.io/keycloak/keycloak:latest start-dev
+  Recreated Keycloak, reattaching the existing keycloak_data volume. A fresh container gets a fresh default Docker bridge network, which fixed the missing
+  network error.
+
+  ---
+  Why the data survived
+
+  docker rm only deletes the container (the running process + its config). Named volumes (skysafe_postgres_data, keycloak_data) are independent objects managed
+  separately by Docker. They persist until you explicitly run docker volume rm or docker rm -v. When the new containers mounted the same volume names, they
+  picked up all existing data exactly where it was left.
