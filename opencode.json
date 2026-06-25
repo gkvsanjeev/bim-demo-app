@@ -19,20 +19,26 @@
     }
   },
   "command": {
+    "docker-up": {
+      "description": "Start PostgreSQL and Keycloak containers (data persists in named volumes — no seeding needed)"
+    },
+    "docker-down": {
+      "description": "Stop containers (data preserved). Use docker-down -v to also wipe volumes for a clean reset"
+    },
     "dev": {
-      "description": "Start Vite dev server and Express API server concurrently for full local environment"
-    },
-    "seed": {
-      "description": "Seed the PostgreSQL database with initial data from db/seed.sql"
-    },
-    "migrate": {
-      "description": "Apply database schema from db/init.sql to PostgreSQL"
+      "description": "Start full local environment: docker-up → pnpm server (Express :8000) → pnpm dev (Vite :5173)"
     },
     "build-check": {
-      "description": "Run TypeScript type-check and Vite build"
+      "description": "Run TypeScript type-check (tsc -b) then Vite production build, followed by pnpm lint"
     },
     "lint-fix": {
-      "description": "Run ESLint with auto-fix on all source files"
+      "description": "Run ESLint with auto-fix across all source files, then confirm build still passes"
+    },
+    "seed": {
+      "description": "Seed test users and sample submissions — only needed after a full volume wipe (docker compose down -v)"
+    },
+    "migrate": {
+      "description": "Re-apply db/init.sql schema manually — only needed after a full volume wipe"
     }
   }
 }
