@@ -5,53 +5,58 @@ description: Applies the SkySAFE 2.0 design system tokens, CSS variables, and ut
 
 # Design System — SkySAFE 2.0
 
-The application follows a monochrome core with pastel color-block sections. All styling uses CSS custom properties defined in `src/index.css`.
+Source of truth: `DESIGN.md` (repo root).
+CSS custom properties and utility classes: `src/styles/tokens.css` (imported globally in `main.tsx`).
+
+Fonts: `--font-sans` = Inter (variable), `--font-mono` = JetBrains Mono. Loaded via Google Fonts in `index.html`.
 
 ## Color Tokens
 
 | Variable | Value | Usage |
 |---|---|---|
-| `--color-primary` | `#000000` | Brand, CTAs, body text |
-| `--color-on-primary` | `#ffffff` | Text on primary background |
-| `--color-ink` | `#000000` | Body text, headers |
-| `--color-accent-magenta` | `#ff3d8b` | Accent highlights |
+| `--color-primary` | `#000000` | Brand, CTAs |
+| `--color-on-primary` | `#ffffff` | Text on primary bg |
+| `--color-ink` | `#000000` | All body text on light surfaces |
 | `--color-canvas` | `#ffffff` | Page background |
-| `--color-inverse-canvas` | `#000000` | Text on dark backgrounds |
-| `--color-surface-soft` | `#f7f7f5` | Card surfaces, subtle panels |
-| `--color-hairline` | `#e6e6e6` | Borders, dividers |
-| `--color-hairline-soft` | `#f1f1f1` | Subtle borders |
-| `--color-success` | `#1ea64a` | Success states |
-| `--color-overlay-scrim` | `rgba(0, 0, 0, 0.6)` | Modal overlays |
+| `--color-inverse-canvas` | `#000000` | Footer, marquee, navy block |
+| `--color-inverse-ink` | `#ffffff` | Text on inverse surfaces |
+| `--color-surface-soft` | `#f7f7f5` | Card tiles, icon btn bg |
+| `--color-hairline` | `#e6e6e6` | 1px borders on inputs/cards |
+| `--color-hairline-soft` | `#f1f1f1` | Subtle row separators |
+| `--color-accent-magenta` | `#ff3d8b` | Promo CTA — use once per page |
+| `--color-success` | `#1ea64a` | Checkmarks, success states |
+| `--color-overlay-scrim` | `#000000` | Apply at 60% opacity for modal scrim |
 
 ### Color Blocks
 
-| Variable | Value | Usage |
-|---|---|---|
-| `--color-block-lime` | `#dceeb1` | Lime panels |
-| `--color-block-lilac` | `#c5b0f4` | Lilac panels |
-| `--color-block-cream` | `#f4ecd6` | Cream panels |
-| `--color-block-mint` | `#c8e6cd` | Mint panels |
-| `--color-block-pink` | `#efd4d4` | Pink panels |
-| `--color-block-coral` | `#f3c9b6` | Coral panels |
-| `--color-block-navy` | `#1f1d3d` | Navy panels (inverse text) |
+| Variable | Value |
+|---|---|
+| `--color-block-lime` | `#dceeb1` |
+| `--color-block-lilac` | `#c5b0f4` |
+| `--color-block-cream` | `#f4ecd6` |
+| `--color-block-mint` | `#c8e6cd` |
+| `--color-block-pink` | `#efd4d4` |
+| `--color-block-coral` | `#f3c9b6` |
+| `--color-block-navy` | `#1f1d3d` |
 
 ## Typography Tokens
 
-| Variable | Size / Line-Height | Weight | Usage |
-|---|---|---|---|
-| `--text-display-xl` | 86px / 1.00 | 340 | Hero headings |
-| `--text-display-lg` | 64px / 1.10 | 340 | Section headings |
-| `--text-headline` | 26px / 1.35 | 540 | Card titles |
-| `--text-subhead` | 26px / 1.35 | 340 | Sub-headings |
-| `--text-card-title` | 24px / 1.45 | 700 | Emphasized titles |
-| `--text-body-lg` | 20px / 1.40 | 330 | Large body text |
-| `--text-body` | 18px / 1.45 | 320 | Default body |
-| `--text-body-sm` | 16px / 1.45 | 330 | Small body |
-| `--text-button` | 20px / 1.40 | 480 | Buttons |
-| `--text-eyebrow` | 18px / 1.30 | 400 | Mono, uppercase labels |
-| `--text-caption` | 12px / 1.00 | 400 | Mono, uppercase captions |
+Individual property variables (compose in CSS modules):
 
-Fonts: `--font-sans` = Inter, `--font-mono` = JetBrains Mono.
+| Role | Size var | Weight var | Line-height var | Letter-spacing var |
+|---|---|---|---|---|
+| display-xl | `--font-size-display-xl` (86px) | 340 | 1.00 | -1.72px |
+| display-lg | `--font-size-display-lg` (64px) | 340 | 1.10 | -0.96px |
+| headline | `--font-size-headline` (26px) | 540 | 1.35 | -0.26px |
+| subhead | `--font-size-subhead` (26px) | 340 | 1.35 | -0.26px |
+| card-title | `--font-size-card-title` (24px) | 700 | 1.45 | 0 |
+| body-lg | `--font-size-body-lg` (20px) | 330 | 1.40 | -0.14px |
+| body | `--font-size-body` (18px) | 320 | 1.45 | -0.26px |
+| body-sm | `--font-size-body-sm` (16px) | 330 | 1.45 | -0.14px |
+| eyebrow | `--font-size-eyebrow` (18px, mono) | 400 | 1.30 | +0.54px |
+| caption | `--font-size-caption` (12px, mono) | 400 | 1.00 | +0.60px |
+
+Or use the pre-built **typography utility classes**: `.type-display-xl`, `.type-headline`, `.type-body`, `.type-eyebrow`, `.type-caption`, etc.
 
 ## Spacing Tokens
 
@@ -69,67 +74,54 @@ Fonts: `--font-sans` = Inter, `--font-mono` = JetBrains Mono.
 
 ## Border Radius Tokens
 
-| Variable | Value |
-|---|---|
-| `--radius-xs` | 2px |
-| `--radius-sm` | 6px |
-| `--radius-md` | 8px |
-| `--radius-lg` | 24px |
-| `--radius-xl` | 32px |
-| `--radius-pill` | 50px |
-| `--radius-full` | 9999px |
+| Variable | Value | Use |
+|---|---|---|
+| `--radius-xs` | 2px | Decorative corners |
+| `--radius-sm` | 6px | Chips, sub-nav |
+| `--radius-md` | 8px | Inputs, image frames |
+| `--radius-lg` | 24px | Cards, color-blocks |
+| `--radius-xl` | 32px | Hero panels |
+| `--radius-pill` | 50px | All text CTAs |
+| `--radius-full` | 9999px | Icon buttons |
 
-## Component Classes
+## Component Utility Classes
 
 ### Buttons
+- `.btn-primary` — black pill, white text
+- `.btn-secondary` — white pill, black text, hairline border
+- `.btn-tertiary` — transparent, text link hit target
+- `.btn-icon` — 40px circle, surface-soft bg (light surfaces)
+- `.btn-icon-inverse` — 40px circle, 16% white bg (dark/navy surfaces)
+- `.btn-magenta` — magenta pill (promo only, once per page)
 
-- `.btn-primary` — Black pill button, white text
-- `.btn-secondary` — White pill button, black text
-- `.btn-tertiary-text` — Plain text link with pill hit target
-- `.btn-icon-circular` — 40x40px circle, surface-soft background
-- `.btn-magenta-promo` — Magenta pill button
+### Color Blocks
+- `.color-block` — base class: radius-lg, xxl padding
+- `.color-block-lime` / `-lilac` / `-cream` / `-mint` / `-pink` / `-coral` / `-navy`
+
+### Cards
+- `.card` — canvas bg, hairline border, radius-lg, lg padding
+- `.card-soft` — surface-soft bg, no border, radius-md, md padding
 
 ### Forms
-
-- `.input-field` — Canvas background, hairline border, md radius
-- `.input-field--error` — Red border, error message below
-- `.label` — Body-sm, weight 480
-- `.label--required` — Red asterisk
-- `.error-msg` — Body-sm, red color
-- `.hint` — Body-sm, ink color, weight 320
-
-### Cards & Blocks
-
-- `.card` — Canvas background, hairline border, no shadow
-- `.card--soft` — Surface-soft background
-- `.color-block` — Radius-lg, xxl padding
-- `.color-block--lime`, `--lilac`, `--cream`, `--mint`, `--pink`, `--coral`, `--navy` — Background variants
-
-### Status Badges
-
-- `.badge` — Inline-flex, pill shape
-- `.badge--submitted` — Blue text/background
-- `.badge--under-review` — Orange text/background
-- `.badge--approved` — Green text/background
-- `.badge--returned` — Red text/background
+- `.input` — full-width, canvas bg, hairline border, radius-md, body typography
 
 ## Design Principles
 
-1. **Monochrome core** — All CTAs, body text, headers use `--color-primary` / `--color-ink` on `--color-canvas`
-2. **Color blocks** — Pastel panels with `--radius-lg` and `--space-xxl` padding
+1. **Monochrome core** — CTAs and body use `--color-primary`/`--color-ink` on `--color-canvas`
+2. **Color blocks** — one pastel panel per viewport; always return to white canvas between them
 3. **Pill buttons only** — `--radius-pill` for text CTAs, `--radius-full` for icon buttons
-4. **Weight, not opacity** — Hierarchy via font-weight, not color darkness
-5. **Mono for taxonomy** — `--font-mono` only for labels, captions — never body copy
-6. **Flat elevation** — Color blocks replace shadows for visual depth
-7. **White canvas between blocks** — `--space-section` (96px) gap between sections
+4. **Weight, not opacity** — font-weight carries hierarchy; no mid-gray text
+5. **Mono for taxonomy** — `--font-mono` only for `.type-eyebrow` / `.type-caption`
+6. **Flat elevation** — color blocks replace shadows; only `--shadow-soft` on floating tiles
+7. **White canvas gap** — `--space-section` (96px) between every two color-block sections
 
 ## Responsive Breakpoints
 
-| Name | Width | Usage |
+| Name | Width | Key changes |
 |---|---|---|
 | Mobile-XS | < 560px | Full-width CTAs, single column |
 | Mobile | 560–768px | Display sizes scale down |
-| Mobile-L | 768–960px | Color blocks full-bleed |
+| Mobile-L | 768–960px | Color blocks go full-bleed (no radius) |
 | Tablet | 960–1280px | 2-column grids, hamburger nav |
 | Desktop | 1280–1440px | 3-column grids, default layout |
 | Desktop-XL | > 1440px | Max content width 1280px |

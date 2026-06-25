@@ -73,6 +73,44 @@ src/
 - Vite middleware at `POST /upload` writes to `public/uploads/<filename>`.
 - Filename sanitised to safe chars only (no path traversal).
 
+## Design System
+
+Source of truth: `DESIGN.md` (repo root). CSS custom properties: `src/styles/tokens.css` (imported globally in `main.tsx` before `index.css`).
+
+**Font substitutes**: Inter (variable) → figmaSans; JetBrains Mono → figmaMono. Both loaded via Google Fonts in `index.html`.
+
+### Token namespaces
+
+| Prefix | Examples |
+|---|---|
+| `--color-*` | `--color-primary`, `--color-block-lime`, `--color-hairline` |
+| `--space-*` | `--space-xs` (8px) … `--space-section` (96px) |
+| `--radius-*` | `--radius-md` (8px), `--radius-pill` (50px), `--radius-full` (9999px) |
+| `--font-size-*` | `--font-size-display-xl` (86px) … `--font-size-caption` (12px) |
+| `--font-weight-*` | `--font-weight-body` (320) … `--font-weight-card-title` (700) |
+| `--line-height-*` | per role |
+| `--letter-spacing-*` | per role |
+
+### Utility classes (all from `src/styles/tokens.css`)
+
+**Typography**: `.type-display-xl`, `.type-display-lg`, `.type-headline`, `.type-subhead`, `.type-card-title`, `.type-body-lg`, `.type-body`, `.type-body-sm`, `.type-link`, `.type-button`, `.type-eyebrow`, `.type-caption`
+
+**Buttons** (all pill-shaped — no square buttons): `.btn-primary`, `.btn-secondary`, `.btn-tertiary`, `.btn-icon`, `.btn-icon-inverse`, `.btn-magenta`
+
+**Color blocks** (pastel section panels): `.color-block` + modifier `.color-block-lime`, `.color-block-lilac`, `.color-block-cream`, `.color-block-mint`, `.color-block-pink`, `.color-block-coral`, `.color-block-navy`
+
+**Cards**: `.card` (hairline border, canvas bg), `.card-soft` (surface-soft bg, no border)
+
+**Forms**: `.input`
+
+### Rules
+
+- Never hardcode hex colors, px spacing, or border-radius values — always use `var(--token)`.
+- Never more than one `.btn-primary` visible in the same viewport.
+- Never two color-blocks adjacent without `var(--space-section)` white-canvas gap between them.
+- `.type-eyebrow` and `.type-caption` only — never use `var(--font-mono)` in body copy.
+- For page → color-block mapping and JSX examples, see `.opencode/skills/ui-patterns.md`.
+
 ## Gotchas
 
 - `pnpm dev` alone does NOT start the Express server. Run both `pnpm dev` and `pnpm server` concurrently.
