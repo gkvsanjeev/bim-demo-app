@@ -1,11 +1,77 @@
-# API Patterns — SkySAFE 2.0 Express Server
+# API Patterns — SkySAFE 2.0
+
+> Two backend services are consumed by this frontend. Each has its own start command and patterns. Follow the section that matches the service you're working on.
+
+---
+
+## Service 1 — iEP Processing API (FastAPI / Python)
+
+**Repo**: `C:\Users\d1336061\OneDrive - NCS PTE LTD\Projects\ECAAS\Application\bim-info-extraction`
+
+### Starting the service
+
+```bash
+cd "C:\Users\d1336061\OneDrive - NCS PTE LTD\Projects\ECAAS\Application\bim-info-extraction"
+uv run uvicorn iep.api.main:app --reload
+```
+
+The `cd` is required — uvicorn resolves `iep.api.main` relative to the project root where `pyproject.toml` lives (source package is `src/iep/`). Running from any other directory will fail with a `ModuleNotFoundError`.
+
+Runs on **`http://localhost:8000`** by default.
+
+### Endpoints
+
+| Method | Path | Purpose |
+|---|---|---|
+| `GET` | `/health` | Liveness check — returns `{"status": "ok"}` |
+| `POST` | `/processing/extract-shell` | Extract exterior shell from IFC file, return structured JSON + trigger background PDF |
+| `GET` | `/processing/analysis-report/{application_ref}` | Download the PDF report (202 if still generating, 404 if no result) |
+| `POST` | `/processing/analyse` | Run selected aviation safety assessments; PDF is generated synchronously so URL is immediately valid |
+
+### Request / response models
+
+All bodies are **pydantic v2 models** defined in `src/iep/models/`. Never pass raw dicts across the API boundary.
+
+`POST /processing/extract-shell` body:
+```json
+{ "application_ref": "APP-2025-001", "ifc_filename": "building.ifc" }
+```
+
+`POST /processing/analyse` body:
+```json
+{
+  "application_ref": "APP-2025-001",
+  "ifc_filename": "building.ifc",
+  "assessments": {
+    "composite_height_template": true,
+    "ols_intersection": true,
+    "ils_technical_template": true,
+    "radar": false,
+    "gfa": true
+  }
+}
+```
+
+### Error handling
+
+- Errors are **structured, not thrown** — all failure paths return the same `ProcessingResponse` shape with a non-empty `errors` array identifying the `stage` and `detail`.
+- Never expect a non-2xx HTTP error from this API; always check `response.errors`.
+- `errors` is always a list (empty on success; one entry per failed stage on partial failure).
+
+### Key constraints
+
+- The IFC file must already be on disk at `data/ifc/<ifc_filename>` — the API does not accept file uploads.
+- Results are cached as JSON in `results/`. A second call with the same `application_ref` returns the cached result immediately.
+- All geospatial coordinates are in **SVY21 (EPSG:3414)**, not WGS84.
+
+---
+
+## Service 2 — SkySAFE Express Server (Node.js / PostgreSQL)
 
 > These are the actual patterns in use in `server/index.ts` and `server/db.ts`.
 > Follow them exactly when adding new routes. Do not invent alternatives.
 
----
-
-## Database Connection
+### Database Connection
 
 `server/db.ts` exports a single shared `Pool`. Import it in every route file — never create a second pool.
 
@@ -30,7 +96,7 @@ export const pool = new Pool({
 
 ---
 
-## Route Structure
+### Route Structure
 
 All routes live in `server/index.ts`. Each route:
 1. Destructures and types `req.body` / `req.query` inline.
@@ -61,7 +127,7 @@ app.post('/resource', async (req, res) => {
 
 ---
 
-## Upsert Pattern (users table)
+### Upsert Pattern (users table)
 
 Use `ON CONFLICT … DO UPDATE` to handle both first-time inserts and subsequent logins atomically.
 
@@ -81,7 +147,7 @@ const userId = result.rows[0].id
 
 ---
 
-## Foreign Key Lookup + 400 Guard
+### Foreign Key Lookup + 400 Guard
 
 When a route needs a local `user_id` from a `keycloak_id`, always guard against missing users:
 
@@ -99,7 +165,7 @@ const userId = userResult.rows[0].id
 
 ---
 
-## Query Filter Pattern (optional query param)
+### Query Filter Pattern (optional query param)
 
 Branching on an optional `?keycloak_id=` query param without code duplication:
 
@@ -127,7 +193,7 @@ app.get('/submissions', async (req, res) => {
 
 ---
 
-## Status History Pattern
+### Status History Pattern
 
 Every status change gets an immutable audit row. Insert it immediately after the main record:
 
@@ -143,7 +209,7 @@ Do NOT update `submission_status_history` rows — they are append-only.
 
 ---
 
-## HTTP Status Codes in Use
+### HTTP Status Codes in Use
 
 | Situation | Code |
 |---|---|
@@ -154,7 +220,7 @@ Do NOT update `submission_status_history` rows — they are append-only.
 
 ---
 
-## API Contract Reference
+### API Contract Reference
 
 All endpoints are proxied through Vite at `/api/*` → `http://localhost:8000`.  
 Full request/response shapes are documented in `plan.md` § 3. API Contract.
@@ -168,7 +234,7 @@ Full request/response shapes are documented in `plan.md` § 3. API Contract.
 
 ---
 
-## What NOT to do
+### What NOT to do (Express server)
 
 - No raw string interpolation in SQL: `WHERE id = '${id}'` → **SQL injection**. Use `$1`.
 - No second `Pool` instance — import from `server/db.ts`.

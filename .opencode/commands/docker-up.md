@@ -2,10 +2,10 @@
 description: Start PostgreSQL and Keycloak containers (data persists in named volumes — no seeding needed)
 ---
 
-Run the following command to start both services in the background:
+Start the containers. If they already exist (stopped after Docker Desktop restart), start them directly to avoid a name-conflict error from compose:
 
 ```bash
-docker compose up -d
+docker start skysafe-postgres skysafe-keycloak 2>/dev/null || docker compose up -d
 ```
 
 This starts:
@@ -14,10 +14,10 @@ This starts:
 
 Both use named volumes (`skysafe_postgres_data`, `keycloak_data`) so all data from the previous session is retained. No need to re-run `db:seed` or reconfigure Keycloak.
 
-Wait for PostgreSQL to be healthy before starting the API server:
+Confirm both are up:
 
 ```bash
-docker compose ps
+docker ps --filter "name=skysafe" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 ```
 
-Status should show `healthy` for `skysafe-postgres` before running `pnpm server`.
+Wait for `skysafe-postgres` to show `Up` before starting the API server with `pnpm server`.
