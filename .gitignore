@@ -27,7 +27,7 @@ dist-ssr
 *.env
 
 # AI tooling runtime artifacts
-.opencode/
+.opencode/settings.local.json
 .playwright-mcp/
 
 # Azurite local blob emulator data
