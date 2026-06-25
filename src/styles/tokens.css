@@ -1,0 +1,406 @@
+/*
+ * Design System Tokens — SkySAFE 2.0
+ * Source of truth: /DESIGN.md
+ *
+ * Font substitutes:
+ *   figmaSans  → Inter (variable, loaded via Google Fonts in index.html)
+ *   figmaMono  → JetBrains Mono (variable, loaded via Google Fonts in index.html)
+ *
+ * Usage: var(--color-primary), var(--space-lg), var(--radius-pill), etc.
+ * Typography utility classes: .type-display-xl, .type-headline, .type-body, etc.
+ * Component utility classes: .btn-primary, .btn-secondary, .color-block, .card, etc.
+ */
+
+/* ─── Tokens ──────────────────────────────────────────────────────────────── */
+
+:root {
+
+  /* Font families */
+  --font-sans: 'Inter', 'SF Pro Display', system-ui, Helvetica, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+
+  /* Colors — brand */
+  --color-primary:        #000000;
+  --color-on-primary:     #ffffff;
+  --color-ink:            #000000;
+  --color-canvas:         #ffffff;
+  --color-inverse-canvas: #000000;
+  --color-inverse-ink:    #ffffff;
+  --color-on-inverse-soft:#ffffff;   /* apply at ~16% opacity for icon btn surfaces on dark */
+  --color-accent-magenta: #ff3d8b;
+
+  /* Colors — surface */
+  --color-hairline:       #e6e6e6;   /* 1px borders on inputs, cards, table dividers */
+  --color-hairline-soft:  #f1f1f1;   /* subtler row separators */
+  --color-surface-soft:   #f7f7f5;   /* off-white tile bg for icon btns, template cards */
+
+  /* Colors — color blocks (the signature pastel panels) */
+  --color-block-lime:   #dceeb1;
+  --color-block-lilac:  #c5b0f4;
+  --color-block-cream:  #f4ecd6;
+  --color-block-mint:   #c8e6cd;
+  --color-block-pink:   #efd4d4;
+  --color-block-coral:  #f3c9b6;
+  --color-block-navy:   #1f1d3d;
+
+  /* Colors — semantic */
+  --color-success:      #1ea64a;
+  --color-overlay-scrim:#000000;     /* apply at ~60% opacity for modal scrim */
+
+  /* Spacing — 8px base unit */
+  --space-hair:    1px;
+  --space-xxs:     4px;
+  --space-xs:      8px;
+  --space-sm:      12px;
+  --space-md:      16px;
+  --space-lg:      24px;
+  --space-xl:      32px;
+  --space-xxl:     48px;
+  --space-section: 96px;
+
+  /* Border radius */
+  --radius-xs:   2px;    /* anchor/link decoration corners */
+  --radius-sm:   6px;    /* small chips, sub-nav tabs */
+  --radius-md:   8px;    /* inputs, image frames, list items */
+  --radius-lg:   24px;   /* cards, color-block sections, large image containers */
+  --radius-xl:   32px;   /* hero panels, oversized callouts */
+  --radius-pill: 50px;   /* all text CTAs — primary, secondary, tab toggles */
+  --radius-full: 9999px; /* circular icon buttons */
+
+  /* Typography — font sizes */
+  --font-size-display-xl: 86px;
+  --font-size-display-lg: 64px;
+  --font-size-headline:   26px;
+  --font-size-subhead:    26px;
+  --font-size-card-title: 24px;
+  --font-size-body-lg:    20px;
+  --font-size-body:       18px;
+  --font-size-body-sm:    16px;
+  --font-size-link:       20px;
+  --font-size-button:     20px;
+  --font-size-eyebrow:    18px;
+  --font-size-caption:    12px;
+
+  /* Typography — font weights (Inter variable axis: 100–900) */
+  --font-weight-display-xl: 340;
+  --font-weight-display-lg: 340;
+  --font-weight-headline:   540;
+  --font-weight-subhead:    340;
+  --font-weight-card-title: 700;
+  --font-weight-body-lg:    330;
+  --font-weight-body:       320;
+  --font-weight-body-sm:    330;
+  --font-weight-link:       480;
+  --font-weight-button:     480;
+  --font-weight-eyebrow:    400;
+  --font-weight-caption:    400;
+
+  /* Typography — line heights */
+  --line-height-display-xl: 1.00;
+  --line-height-display-lg: 1.10;
+  --line-height-headline:   1.35;
+  --line-height-subhead:    1.35;
+  --line-height-card-title: 1.45;
+  --line-height-body-lg:    1.40;
+  --line-height-body:       1.45;
+  --line-height-body-sm:    1.45;
+  --line-height-link:       1.40;
+  --line-height-button:     1.40;
+  --line-height-eyebrow:    1.30;
+  --line-height-caption:    1.00;
+
+  /* Typography — letter spacing */
+  --letter-spacing-display-xl: -1.72px;
+  --letter-spacing-display-lg: -0.96px;
+  --letter-spacing-headline:   -0.26px;
+  --letter-spacing-subhead:    -0.26px;
+  --letter-spacing-card-title:  0px;
+  --letter-spacing-body-lg:    -0.14px;
+  --letter-spacing-body:       -0.26px;
+  --letter-spacing-body-sm:    -0.14px;
+  --letter-spacing-link:       -0.10px;
+  --letter-spacing-button:     -0.10px;
+  --letter-spacing-eyebrow:     0.54px;
+  --letter-spacing-caption:     0.60px;
+
+  /* Elevation — shadow values */
+  --shadow-soft:  0 4px 16px rgba(0, 0, 0, 0.06);  /* floating tiles, dropdowns */
+  --shadow-modal: 0 8px 40px rgba(0, 0, 0, 0.18);  /* modals, lightboxes */
+}
+
+
+/* ─── Typography utility classes ─────────────────────────────────────────── */
+/* Apply directly in JSX: <h1 className="type-display-xl"> */
+
+.type-display-xl {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-display-xl);
+  font-weight: var(--font-weight-display-xl);
+  line-height: var(--line-height-display-xl);
+  letter-spacing: var(--letter-spacing-display-xl);
+  font-feature-settings: 'kern';
+}
+
+.type-display-lg {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-display-lg);
+  font-weight: var(--font-weight-display-lg);
+  line-height: var(--line-height-display-lg);
+  letter-spacing: var(--letter-spacing-display-lg);
+  font-feature-settings: 'kern';
+}
+
+.type-headline {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-headline);
+  font-weight: var(--font-weight-headline);
+  line-height: var(--line-height-headline);
+  letter-spacing: var(--letter-spacing-headline);
+  font-feature-settings: 'kern';
+}
+
+.type-subhead {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-subhead);
+  font-weight: var(--font-weight-subhead);
+  line-height: var(--line-height-subhead);
+  letter-spacing: var(--letter-spacing-subhead);
+  font-feature-settings: 'kern';
+}
+
+.type-card-title {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-card-title);
+  font-weight: var(--font-weight-card-title);
+  line-height: var(--line-height-card-title);
+  letter-spacing: var(--letter-spacing-card-title);
+  font-feature-settings: 'kern';
+}
+
+.type-body-lg {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-body-lg);
+  font-weight: var(--font-weight-body-lg);
+  line-height: var(--line-height-body-lg);
+  letter-spacing: var(--letter-spacing-body-lg);
+  font-feature-settings: 'kern';
+}
+
+.type-body {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-body);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-body);
+  font-feature-settings: 'kern';
+}
+
+.type-body-sm {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-body-sm);
+  line-height: var(--line-height-body-sm);
+  letter-spacing: var(--letter-spacing-body-sm);
+  font-feature-settings: 'kern';
+}
+
+.type-link {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-link);
+  font-weight: var(--font-weight-link);
+  line-height: var(--line-height-link);
+  letter-spacing: var(--letter-spacing-link);
+  font-feature-settings: 'kern';
+}
+
+.type-button {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-button);
+  font-weight: var(--font-weight-button);
+  line-height: var(--line-height-button);
+  letter-spacing: var(--letter-spacing-button);
+  font-feature-settings: 'kern';
+}
+
+/* figmaMono roles — always uppercase */
+.type-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-eyebrow);
+  font-weight: var(--font-weight-eyebrow);
+  line-height: var(--line-height-eyebrow);
+  letter-spacing: var(--letter-spacing-eyebrow);
+  text-transform: uppercase;
+}
+
+.type-caption {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-caption);
+  line-height: var(--line-height-caption);
+  letter-spacing: var(--letter-spacing-caption);
+  text-transform: uppercase;
+}
+
+
+/* ─── Component utility classes ───────────────────────────────────────────── */
+/* Use in JSX className or compose in CSS modules via class extension. */
+
+/* Buttons — all CTAs are pills; no square buttons */
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-button);
+  font-weight: var(--font-weight-button);
+  line-height: var(--line-height-button);
+  letter-spacing: var(--letter-spacing-button);
+  padding: 10px var(--space-lg);
+  border-radius: var(--radius-pill);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-button);
+  font-weight: var(--font-weight-button);
+  line-height: var(--line-height-button);
+  letter-spacing: var(--letter-spacing-button);
+  padding: 8px 18px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-hairline);
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-tertiary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xxs);
+  background-color: transparent;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-link);
+  font-weight: var(--font-weight-link);
+  line-height: var(--line-height-link);
+  letter-spacing: var(--letter-spacing-link);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-full);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: var(--color-surface-soft);
+  color: var(--color-ink);
+  border-radius: var(--radius-full);
+  border: none;
+  cursor: pointer;
+}
+
+.btn-icon-inverse {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.16);
+  color: var(--color-inverse-ink);
+  border-radius: var(--radius-full);
+  border: none;
+  cursor: pointer;
+}
+
+.btn-magenta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-accent-magenta);
+  color: var(--color-on-primary);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-button);
+  font-weight: var(--font-weight-button);
+  line-height: var(--line-height-button);
+  letter-spacing: var(--letter-spacing-button);
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* Color-block sections — the signature pastel panels */
+
+.color-block {
+  border-radius: var(--radius-lg);
+  padding: var(--space-xxl);
+  color: var(--color-ink);
+}
+
+.color-block-lime   { background-color: var(--color-block-lime); }
+.color-block-lilac  { background-color: var(--color-block-lilac); }
+.color-block-cream  { background-color: var(--color-block-cream); }
+.color-block-mint   { background-color: var(--color-block-mint); }
+.color-block-pink   { background-color: var(--color-block-pink); }
+.color-block-coral  { background-color: var(--color-block-coral); }
+.color-block-navy   {
+  background-color: var(--color-block-navy);
+  color: var(--color-inverse-ink);
+}
+
+/* Cards */
+
+.card {
+  background-color: var(--color-canvas);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+}
+
+.card-soft {
+  background-color: var(--color-surface-soft);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+}
+
+/* Form input */
+
+.input {
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-body);
+  line-height: var(--line-height-body);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
+}

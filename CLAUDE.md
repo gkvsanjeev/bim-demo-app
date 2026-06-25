@@ -39,7 +39,7 @@ This repository currently contains the **demo / PoC** of the GIS Client. Backend
 
 - State management (Redux Toolkit vs Zustand vs React Query only) — **not chosen yet**
 - Router (React Router vs TanStack Router) — **not chosen yet**
-- UI kit (Mantine vs MUI vs shadcn/ui + Tailwind) — **not chosen yet**
+- UI component library (Mantine vs MUI vs shadcn/ui) — **not chosen yet** (design tokens are defined; a component lib is additive)
 - Auth (Singpass / Corppass for Public User; AD/OIDC for CAAS Intranet users) — **TBD with CAAS**
 - API client (fetch wrapper vs axios vs ky) — **TBD**
 - Testing (Vitest + React Testing Library is the leaning) — **TBD**
@@ -214,7 +214,16 @@ When loading a web scene via `item-id`, the portal item defines its own basemap.
 
 ### Styling
 
-- Until a UI kit is chosen, keep CSS minimal and feature-scoped (`*.module.css` or inline ArcGIS theme overrides).
+The design system is defined in **`DESIGN.md`** (repo root). CSS custom properties for every token are in **`src/styles/tokens.css`**, imported globally before `index.css` in `main.tsx`.
+
+**Rules — enforce on every UI task:**
+- **Read `DESIGN.md` before writing any new component.** Identify which component recipe (button, card, color-block, input) applies before touching CSS.
+- **Always use token variables.** Never hardcode colors (`#000`), spacing (`16px`), font sizes, or border radii. Use `var(--color-primary)`, `var(--space-lg)`, `var(--radius-pill)`, etc.
+- Use `.type-*` utility classes from `tokens.css` for typography, or copy their individual property variables into a CSS module.
+- Use `.btn-primary`, `.btn-secondary`, `.color-block`, `.card`, `.input` utility classes from `tokens.css` directly in JSX, or extend them in a CSS module.
+- Scope layout to the component with `*.module.css`. Layout properties only — no color, font, or spacing overrides that conflict with tokens.
+- **Font substitute:** Inter (variable) for figmaSans; JetBrains Mono for figmaMono. Both are loaded via Google Fonts in `index.html`. Never set `font-family` to anything else.
+- For UI skill patterns with JSX examples, read `.opencode/skills/ui-patterns.md`.
 - Do not introduce Tailwind, MUI, or Mantine without confirming.
 
 ---

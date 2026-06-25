@@ -4,6 +4,7 @@ import { RouterProvider } from 'react-router-dom'
 import { AuthProvider } from './app/AuthProvider'
 import { router } from './app/router'
 import '@arcgis/core/assets/esri/themes/light/main.css'
+import './styles/tokens.css'
 import './index.css'
 
 createRoot(document.getElementById('root')!).render(
