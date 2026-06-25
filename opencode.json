@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "AGENTS.md",
+    "requirements.md",
+    "plan.md",
+    "tasks.md"
+  ],
+  "skills": {
+    "paths": [".opencode/skills"]
+  },
+  "agent": {
+    "plan": {
+      "description": "Reads plan.md, tasks.md, requirements.md and breaks work into atomic shippable tasks. Maintains task status tracking across phases."
+    },
+    "review": {
+      "description": "Reviews code against ArcGIS non-negotiable rules, TypeScript strict mode, and design system tokens. Catches violations before commit."
+    }
+  },
+  "command": {
+    "dev": {
+      "description": "Start Vite dev server and Express API server concurrently for full local environment"
+    },
+    "seed": {
+      "description": "Seed the PostgreSQL database with initial data from db/seed.sql"
+    },
+    "migrate": {
+      "description": "Apply database schema from db/init.sql to PostgreSQL"
+    },
+    "build-check": {
+      "description": "Run TypeScript type-check and Vite build"
+    },
+    "lint-fix": {
+      "description": "Run ESLint with auto-fix on all source files"
+    }
+  }
+}

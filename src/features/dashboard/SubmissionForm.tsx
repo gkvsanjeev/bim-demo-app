@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from 'react-oidc-context'
 import JSZip from 'jszip'
 import { DashboardHeader } from './DashboardHeader'
-import { addSubmission, generateApplicationId } from '../../lib/submissionStore'
+import { generateApplicationId } from '../../lib/submissionStore'
+import { createSubmission } from '../../lib/api'
 import styles from './SubmissionForm.module.css'
 
 const MAX_FILE_BYTES = 100 * 1024 * 1024 // 100 MB
@@ -145,25 +146,30 @@ export function SubmissionForm() {
     setIsSubmitting(true)
     setErrors({})
 
+    let filePath = ''
     try {
-      await uploadFile(fileState.file)
+      filePath = await uploadFile(fileState.file)
     } catch (err) {
       setErrors({ submit: err instanceof Error ? err.message : 'Upload failed. Try again.' })
       setIsSubmitting(false)
       return
     }
 
-    addSubmission({
-      id: appRef,
-      buildingName: buildingName.trim(),
-      address: address.trim(),
-      submitterName: applicantName.trim(),
-      submitterEmail: applicantEmail.trim().toLowerCase(),
-      submittedAt: new Date().toISOString(),
-      status: 'Submitted',
-      fileName: fileState.file.name,
-      fileSize: fileState.file.size,
-    })
+    try {
+      await createSubmission({
+        id: appRef,
+        building_name: buildingName.trim(),
+        address: address.trim(),
+        keycloak_id: auth.user!.profile.sub,
+        file_name: fileState.file.name,
+        file_size: fileState.file.size,
+        file_path: filePath,
+      })
+    } catch (err) {
+      setErrors({ submit: err instanceof Error ? err.message : 'Submission failed. Try again.' })
+      setIsSubmitting(false)
+      return
+    }
 
     navigate('/dashboard')
   }

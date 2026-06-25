@@ -1,8 +1,8 @@
-import { useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from 'react-oidc-context'
 import { DashboardHeader } from './DashboardHeader'
-import { getUserSubmissions } from '../../lib/submissionStore'
+import { fetchUserSubmissions } from '../../lib/api'
 import type { Submission } from '../../types/submission'
 import styles from './PublicDashboard.module.css'
 
@@ -29,11 +29,15 @@ function formatFileSize(bytes: number): string {
 export function PublicDashboard() {
   const auth = useAuth()
   const navigate = useNavigate()
-  const userEmail = auth.user?.profile.email as string | undefined
-  const submissions = useMemo<Submission[]>(
-    () => (userEmail ? getUserSubmissions(userEmail) : []),
-    [userEmail],
-  )
+  const keycloakId = auth.user?.profile.sub
+  const [submissions, setSubmissions] = useState<Submission[]>([])
+
+  useEffect(() => {
+    if (!keycloakId) return
+    fetchUserSubmissions(keycloakId)
+      .then((data) => setSubmissions(data))
+      .catch(console.error)
+  }, [keycloakId])
 
   const userName = (auth.user?.profile.name ?? auth.user?.profile.email ?? 'User') as string
   const firstName = userName.split(' ')[0]

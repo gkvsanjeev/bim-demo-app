@@ -61,7 +61,7 @@ export function LoginPage() {
           Sky<span className={styles.appNameAccent}>SAFE</span> 2.0
         </h1>
         <p className={styles.orgName}>Civil Aviation Authority of Singapore</p>
-        <p className={styles.tagline}>Building Height Consultation System</p>
+        <p className={styles.tagline}>Building Information and Assessment System</p>
 
         <div className={styles.divider} />
 

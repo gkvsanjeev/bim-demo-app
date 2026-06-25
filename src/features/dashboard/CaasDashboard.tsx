@@ -1,8 +1,8 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from 'react-oidc-context'
 import { DashboardHeader } from './DashboardHeader'
-import { getAllSubmissions } from '../../lib/submissionStore'
+import { fetchAllSubmissions } from '../../lib/api'
 import { ROLE_LABELS, getPrimaryRole } from '../../config/auth'
 import type { Submission } from '../../types/submission'
 import styles from './CaasDashboard.module.css'
@@ -29,13 +29,18 @@ function formatDate(iso: string): string {
 export function CaasDashboard() {
   const auth = useAuth()
   const navigate = useNavigate()
-  // Lazy initializer: reads localStorage once on mount
-  const [submissions] = useState<Submission[]>(getAllSubmissions)
+  const [submissions, setSubmissions] = useState<Submission[]>([])
   const [filter, setFilter] = useState<FilterStatus>('All')
   const [search, setSearch] = useState('')
 
   const role = getPrimaryRole(auth.user)
   const roleLabel = role ? ROLE_LABELS[role] : ''
+
+  useEffect(() => {
+    fetchAllSubmissions()
+      .then((data) => setSubmissions(data))
+      .catch(console.error)
+  }, [])
 
   const filtered = useMemo(
     () =>
