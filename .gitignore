@@ -25,3 +25,19 @@ dist-ssr
 *.sln
 *.sw?
 *.env
+
+# AI tooling runtime artifacts
+.opencode/
+.playwright-mcp/
+
+# Azurite local blob emulator data
+__azurite_db_blob__.json
+__azurite_db_blob_extent__.json
+
+# Uploaded files (local dev only)
+public/uploads/
+
+# Ephemeral planning / session docs
+plan.md
+tasks.md
+session-ses_*.md
